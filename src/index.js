@@ -30,7 +30,8 @@ document.body.appendChild(renderer.domElement)
 let spriteAnimated
 init(s => {
     spriteAnimated = s.spriteAnimated
-    scene.add(s.frames.sprite)
+    window.spriteAnimated = spriteAnimated
+    scene.add(spriteAnimated.sprites)
 })
 
 // animate

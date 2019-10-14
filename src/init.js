@@ -7,6 +7,7 @@ export default function init(cb) {
     // const url = 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png'
     // const url = 'https://i.ibb.co/RT1V9mW/both-numbers.png'
     const url = './tiles.png'
+    const url2 = './tiles2.png'
     const loader = new THREE.TextureLoader()
     const texture = loader.load(url)
     const material = new THREE.SpriteMaterial({
@@ -14,17 +15,32 @@ export default function init(cb) {
     })
     material.map.minFilter = THREE.LinearFilter
 
+    const texture2 = loader.load(url2)
+    const material2 = new THREE.SpriteMaterial({
+        map: texture2
+    })
+    material2.map.minFilter = THREE.LinearFilter
+
     const spriteAnimated = SpriteAnimated()
-    const frames = spriteAnimated.addFrames({
+    spriteAnimated.addFrames({
         material,
         width: 256,
         height: 256,
-        tiles: 63
+        frameDisplayDuration: 1000 / 30, // 30 frames per second
+        totalFrames: 63
+    })
+    spriteAnimated.addFrames({
+        material: material2,
+        width: 256,
+        height: 256,
+        flipH: true,
+        frameDisplayDuration: 1000 / 30,
+        totalFrames: 63
     })
     const scale = 10
-    frames.sprite.position.set(5, 5, 5)
-    frames.sprite.scale.set(scale, scale, scale)
-    cb({ frames, spriteAnimated })
+    spriteAnimated.sprites.position.set(5, 5, 5)
+    spriteAnimated.sprites.scale.set(scale, scale, scale)
+    cb({ spriteAnimated })
 }
 
 // export default function init(cb) {

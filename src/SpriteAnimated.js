@@ -1,40 +1,48 @@
 import * as THREE from 'three'
 
 export default function SpriteAnimated() {
-    const spriteanimated = {}
-    const framesets = []
-
-    spriteanimated.currentFrame = 1
-    spriteanimated.currentDisplayTime = 0
-    spriteanimated.tileDisplayDuration = 40 // milliSec
-
-    spriteanimated.currentDisplayTime > spriteanimated.tileDisplayDuration
+    const spriteanimated = {
+        playing: true,
+        currentFrame: 0,
+        currentDisplayTime: 0,
+        frames: [],
+        sprites: new THREE.Group()
+    }
 
     spriteanimated.update = delta => {
         spriteanimated.currentDisplayTime += delta * 1000
-        if (
-            spriteanimated.currentDisplayTime >
-            spriteanimated.tileDisplayDuration
-        ) {
-            spriteanimated.currentDisplayTime = 0
-            const currentFrame =
-                spriteanimated.currentFrame > 30
-                    ? 1
-                    : spriteanimated.currentFrame + 1
-            spriteanimated.goTo(currentFrame)
+
+        const currentFrame = spriteanimated.currentFrame
+        const { frameDisplayDuration } = spriteanimated.frames[currentFrame]
+
+        // console.log(spriteanimated.currentDisplayTime, frameDisplayDuration)
+        while (spriteanimated.currentDisplayTime > frameDisplayDuration) {
+            spriteanimated.currentDisplayTime -= frameDisplayDuration
+            spriteanimated.goTo(
+                currentFrame < spriteanimated.frames.length - 1
+                    ? currentFrame + 1
+                    : 0
+            )
         }
     }
 
-    spriteanimated.goTo = frame => {
+    spriteanimated.goTo = currentFrame => {
+        const { frameSet, frameIndex } = spriteanimated.frames[currentFrame]
+
         const {
             framesHorizontal,
             framesVertical,
             flipH,
             flipV,
-            texture
-        } = framesets[0]
+            texture,
+            sprite
+        } = frameSet
+
+        // Hiding framesets that are not being visible
+        spriteanimated.sprites.children.forEach(s => (s.visible = sprite === s))
+
         const { x, y } = getOffsetTexture({
-            frame,
+            frame: frameIndex,
             framesHorizontal,
             framesVertical,
             flipH,
@@ -42,7 +50,7 @@ export default function SpriteAnimated() {
         })
         texture.offset.x = x
         texture.offset.y = y
-        spriteanimated.currentFrame = frame
+        spriteanimated.currentFrame = currentFrame
     }
 
     spriteanimated.addFrames = ({
@@ -50,6 +58,7 @@ export default function SpriteAnimated() {
         width,
         height,
         totalFrames,
+        frameDisplayDuration,
         flipH = false,
         flipV = false
     }) => {
@@ -67,7 +76,7 @@ export default function SpriteAnimated() {
         }
 
         const sprite = new THREE.Sprite(material)
-        const frameset = {
+        const frameSet = {
             sprite,
             texture,
             totalFrames,
@@ -77,25 +86,35 @@ export default function SpriteAnimated() {
 
         if (texture.image !== undefined) {
             const { framesHorizontal, framesVertical } = defineTiles()
-            frameset.framesHorizontal = framesHorizontal
-            frameset.framesVertical = framesVertical
-            spriteanimated.goTo(1)
+            frameSet.framesHorizontal = framesHorizontal
+            frameSet.framesVertical = framesVertical
+            spriteanimated.goTo(0)
         } else {
             const textureOnUpdate = texture.onUpdate
             texture.onUpdate = (...args) => {
                 const { framesHorizontal, framesVertical } = defineTiles()
-                frameset.framesHorizontal = framesHorizontal
-                frameset.framesVertical = framesVertical
+                frameSet.framesHorizontal = framesHorizontal
+                frameSet.framesVertical = framesVertical
                 if (typeof textureOnUpdate === 'function') {
                     textureOnUpdate(...args)
                 }
                 texture.onUpdate = textureOnUpdate
-                spriteanimated.goTo(1)
+                spriteanimated.goTo(0)
             }
         }
 
-        framesets.push(frameset)
-        return frameset
+        spriteanimated.sprites.add(sprite)
+
+        // Creating Frames
+        for (let frameIndex = 0; frameIndex < totalFrames; ++frameIndex) {
+            spriteanimated.frames.push({
+                frameIndex,
+                frameSet,
+                frameDisplayDuration
+            })
+        }
+
+        return frameSet
     }
 
     return spriteanimated
@@ -108,7 +127,6 @@ function getOffsetTexture({
     flipH,
     flipV
 }) {
-    frame = frame - 1
     const currentColumn = flipH
         ? framesHorizontal - (frame % framesHorizontal) - 1
         : frame % framesHorizontal
