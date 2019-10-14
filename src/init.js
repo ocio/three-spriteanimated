@@ -14,17 +14,17 @@ export default function init(cb) {
     })
     material.map.minFilter = THREE.LinearFilter
 
-    const spriteAnimated = new SpriteAnimated()
-    const warrior = spriteAnimated.addFrames({
+    const spriteAnimated = SpriteAnimated()
+    const frames = spriteAnimated.addFrames({
         material,
         width: 256,
         height: 256,
         tiles: 63
     })
     const scale = 10
-    warrior.position.set(5, 5, 5)
-    warrior.scale.set(scale, scale, scale)
-    cb({ warrior, spriteAnimated })
+    frames.sprite.position.set(5, 5, 5)
+    frames.sprite.scale.set(scale, scale, scale)
+    cb({ frames, spriteAnimated })
 }
 
 // export default function init(cb) {

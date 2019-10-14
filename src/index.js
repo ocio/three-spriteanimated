@@ -27,12 +27,10 @@ scene.add(dirLight, new THREE.AmbientLight(0x444444))
 
 document.body.appendChild(renderer.domElement)
 
-let spriteMixer
-let warrior
+let spriteAnimated
 init(s => {
-    spriteMixer = s.spriteMixer
-    warrior = s.warrior
-    scene.add(warrior)
+    spriteAnimated = s.spriteAnimated
+    scene.add(s.frames.sprite)
 })
 
 // animate
@@ -42,8 +40,7 @@ function animate(time) {
     requestAnimationFrame(animate)
 
     var delta = clock.getDelta()
-    // console.log(delta, new THREE.Clock().getDelta())
-    // spriteMixer.update(delta)
+    spriteAnimated.update(delta)
 }
 animate()
 

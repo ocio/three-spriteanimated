@@ -1,77 +1,122 @@
 import * as THREE from 'three'
 
-export default function SpriteAnimated() {}
+export default function SpriteAnimated() {
+    const spriteanimated = {}
+    const framesets = []
 
-SpriteAnimated.prototype.addFrames = function({
-    material,
-    width,
-    height,
-    tiles,
-    flipH = false,
-    flipV = false
-}) {
-    const texture = material.map
-    // texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+    spriteanimated.currentFrame = 1
+    spriteanimated.currentDisplayTime = 0
+    spriteanimated.tileDisplayDuration = 40 // milliSec
 
-    const defineTiles = () => {
-        const image = texture.image
-        const tilesHorizontal = image.width / width
-        const tilesVertical = image.height / height
-        texture.repeat.set(
-            (flipH ? -1 : 1) / tilesHorizontal,
-            (flipV ? -1 : 1) / tilesVertical
-        )
+    spriteanimated.currentDisplayTime > spriteanimated.tileDisplayDuration
+
+    spriteanimated.update = delta => {
+        spriteanimated.currentDisplayTime += delta * 1000
+        if (
+            spriteanimated.currentDisplayTime >
+            spriteanimated.tileDisplayDuration
+        ) {
+            spriteanimated.currentDisplayTime = 0
+            const currentFrame =
+                spriteanimated.currentFrame > 30
+                    ? 1
+                    : spriteanimated.currentFrame + 1
+            spriteanimated.goTo(currentFrame)
+        }
+    }
+
+    spriteanimated.goTo = frame => {
+        const {
+            framesHorizontal,
+            framesVertical,
+            flipH,
+            flipV,
+            texture
+        } = framesets[0]
         const { x, y } = getOffsetTexture({
-            tile: 10,
-            tilesHorizontal,
-            tilesVertical,
+            frame,
+            framesHorizontal,
+            framesVertical,
             flipH,
             flipV
         })
         texture.offset.x = x
         texture.offset.y = y
+        spriteanimated.currentFrame = frame
     }
 
-    if (texture.image !== undefined) {
-        defineTiles()
-    } else {
-        const textureOnUpdate = texture.onUpdate
-        texture.onUpdate = (...args) => {
-            defineTiles()
-            if (typeof textureOnUpdate === 'function') {
-                textureOnUpdate(...args)
-            }
-            texture.onUpdate = textureOnUpdate
+    spriteanimated.addFrames = ({
+        material,
+        width,
+        height,
+        totalFrames,
+        flipH = false,
+        flipV = false
+    }) => {
+        const texture = material.map
+        // texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+
+        const defineTiles = () => {
+            const framesHorizontal = texture.image.width / width
+            const framesVertical = texture.image.height / height
+            texture.repeat.set(
+                (flipH ? -1 : 1) / framesHorizontal,
+                (flipV ? -1 : 1) / framesVertical
+            )
+            return { framesHorizontal, framesVertical }
         }
+
+        const sprite = new THREE.Sprite(material)
+        const frameset = {
+            sprite,
+            texture,
+            totalFrames,
+            flipH,
+            flipV
+        }
+
+        if (texture.image !== undefined) {
+            const { framesHorizontal, framesVertical } = defineTiles()
+            frameset.framesHorizontal = framesHorizontal
+            frameset.framesVertical = framesVertical
+            spriteanimated.goTo(1)
+        } else {
+            const textureOnUpdate = texture.onUpdate
+            texture.onUpdate = (...args) => {
+                const { framesHorizontal, framesVertical } = defineTiles()
+                frameset.framesHorizontal = framesHorizontal
+                frameset.framesVertical = framesVertical
+                if (typeof textureOnUpdate === 'function') {
+                    textureOnUpdate(...args)
+                }
+                texture.onUpdate = textureOnUpdate
+                spriteanimated.goTo(1)
+            }
+        }
+
+        framesets.push(frameset)
+        return frameset
     }
 
-    const sprite = new THREE.Sprite(material)
-    return sprite
+    return spriteanimated
 }
 
 function getOffsetTexture({
-    tile,
-    tilesHorizontal,
-    tilesVertical,
+    frame,
+    framesHorizontal,
+    framesVertical,
     flipH,
     flipV
 }) {
-    tile = tile - 1
+    frame = frame - 1
     const currentColumn = flipH
-        ? tilesHorizontal - (tile % tilesHorizontal) - 1
-        : tile % tilesHorizontal
+        ? framesHorizontal - (frame % framesHorizontal) - 1
+        : frame % framesHorizontal
     const currentRow = flipV
-        ? tilesVertical - Math.floor(tile / tilesHorizontal) - 1
-        : Math.floor(tile / tilesHorizontal)
-    console.log({
-        tile,
-        currentColumn,
-        currentRow,
-        tilesHorizontal,
-        tilesVertical
-    })
-    const x = currentColumn / tilesHorizontal
-    const y = (tilesVertical - currentRow - 1) / tilesVertical
+        ? framesVertical - Math.floor(frame / framesHorizontal) - 1
+        : Math.floor(frame / framesHorizontal)
+    const x = currentColumn / framesHorizontal
+    const y = (framesVertical - currentRow - 1) / framesVertical
     return {
         x: flipH ? 1 - x : x,
         y: flipV ? 1 - y : y

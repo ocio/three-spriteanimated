@@ -15,20 +15,6 @@ export default function SpriteMixer() {
         }
     }
 
-    function offsetTexture(actionSprite) {
-        // This offsets the texture to make the next frame of the animation appear.
-        let currentColumn =
-            actionSprite.currentTile % actionSprite.tilesHorizontal
-        actionSprite.material.map.offset.x =
-            currentColumn / actionSprite.tilesHorizontal
-        let currentRow = Math.floor(
-            actionSprite.currentTile / actionSprite.tilesHorizontal
-        )
-        actionSprite.material.map.offset.y =
-            (actionSprite.tilesVertical - currentRow - 1) /
-            actionSprite.tilesVertical
-    }
-
     function updateSprite(actionSprite, milliSec) {
         actionSprite.currentDisplayTime += milliSec
 
@@ -68,6 +54,20 @@ export default function SpriteMixer() {
                 }
             }
         }
+    }
+
+    function offsetTexture(actionSprite) {
+        // This offsets the texture to make the next frame of the animation appear.
+        let currentColumn =
+            actionSprite.currentTile % actionSprite.tilesHorizontal
+        actionSprite.material.map.offset.x =
+            currentColumn / actionSprite.tilesHorizontal
+        let currentRow = Math.floor(
+            actionSprite.currentTile / actionSprite.tilesHorizontal
+        )
+        actionSprite.material.map.offset.y =
+            (actionSprite.tilesVertical - currentRow - 1) /
+            actionSprite.tilesVertical
     }
 
     // reveal the sprite and play the action only once
