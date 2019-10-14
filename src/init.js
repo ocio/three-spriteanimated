@@ -7,19 +7,15 @@ export default function init(cb) {
     // const url = 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png'
     // const url = 'https://i.ibb.co/RT1V9mW/both-numbers.png'
     const url = './tiles.png'
-    const url2 = './tiles2.png'
     const loader = new THREE.TextureLoader()
     const texture = loader.load(url)
     const material = new THREE.SpriteMaterial({
         map: texture
     })
-    material.map.minFilter = THREE.LinearFilter
-
-    const texture2 = loader.load(url2)
+    const texture2 = loader.load(url)
     const material2 = new THREE.SpriteMaterial({
         map: texture2
     })
-    material2.map.minFilter = THREE.LinearFilter
 
     const spriteAnimated = SpriteAnimated()
     spriteAnimated.addFrames({
