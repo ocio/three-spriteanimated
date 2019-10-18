@@ -3,54 +3,49 @@ import * as THREE from 'three'
 import SpriteAnimated from './SpriteAnimated'
 
 export default function init(cb) {
-    // const url = 'https://i.ibb.co/mqTC0sy/spritesheet-1.png'
-    // const url = 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png'
-    const url = 'https://i.ibb.co/RT1V9mW/both-numbers.png'
-    // const url = './tiles.png'
-    // const url = './tiles2.png'
+    // const [url, fH, fV] = ['https://i.ibb.co/Hq62Pqr/spritesheet-1.png', 1, 31] // 31
+    // const [url, fH, fV] = ['./62.png', 31, 2]
+    const [url, fH, fV] = ['./60.png', 30, 2]
+    // const [url, fH, fV] = ['./tiles.png', 32, 2]
     const loader = new THREE.TextureLoader()
     const material = new THREE.SpriteMaterial({ map: loader.load(url) })
     material.map.minFilter = THREE.LinearFilter
 
     const material2 = new THREE.SpriteMaterial({ map: loader.load(url) })
-    // material2.map.minFilter = THREE.LinearFilter
+    material2.map.minFilter = THREE.LinearFilter
 
-    const size = 256
-    const totalFrames = 62
-    const fps = 30
+    const fps = 5
     const frameDisplayDuration = 1000 / fps // 30 frames per second
     const soldier = SpriteAnimated()
     soldier.addFrames({
         material,
-        width: size,
-        height: size,
-        frameDisplayDuration,
-        totalFrames
+        framesHorizontal: fH,
+        framesVertical: fV,
+        frameDisplayDuration
     })
     soldier.addFrames({
         material: material2,
-        width: size,
-        height: size,
-        flipH: true,
-        flipV: true,
-        frameDisplayDuration,
-        totalFrames
+        framesHorizontal: fH,
+        framesVertical: fV,
+        flipHorizontal: true,
+        // flipVertical: true,
+        frameDisplayDuration
     })
 
     // console.log(soldier.frames.length)
-    // soldier.goto(29)
+    soldier.goto(0)
     // soldier.pause()
-    soldier.setKeyFrame(30, {
-        onEnterFrame: () => {
-            console.log('onEnterFrame', soldier.currentFrame)
-            // setTimeout(() => {
-            //     console.log(soldier.currentFrame)
-            //     soldier.goto(0).play()
-            // }, 1000)
-            // soldier.pause()
-            return 0
-        }
-    })
+    // soldier.setKeyFrame(30, {
+    //     onEnterFrame: () => {
+    //         console.log('onEnterFrame', soldier.currentFrame)
+    //         // setTimeout(() => {
+    //         //     console.log(soldier.currentFrame)
+    //         //     soldier.goto(0).play()
+    //         // }, 1000)
+    //         // soldier.pause()
+    //         return 0
+    //     }
+    // })
 
     const scale = 10
     soldier.sprites.position.set(5, 5, 5)
