@@ -27,11 +27,11 @@ scene.add(dirLight, new THREE.AmbientLight(0x444444))
 
 document.body.appendChild(renderer.domElement)
 
-let spriteAnimated
+let soldier
 init(s => {
-    spriteAnimated = s.spriteAnimated
-    window.spriteAnimated = spriteAnimated
-    scene.add(spriteAnimated.sprites)
+    soldier = s.soldier
+    window.soldier = soldier
+    scene.add(soldier.sprites)
 })
 
 // animate
@@ -41,7 +41,7 @@ function animate(time) {
     requestAnimationFrame(animate)
 
     var delta = clock.getDelta()
-    spriteAnimated.update(delta)
+    soldier.update(delta)
 }
 animate()
 
