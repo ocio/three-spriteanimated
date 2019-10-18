@@ -1,102 +1,98 @@
+// https://www.codeandweb.com/free-sprite-sheet-packer
+import './styles.css'
 import * as THREE from 'three'
-// import SpriteMixer from './SpriteMixer'
 import SpriteAnimated from './SpriteAnimated'
 
-export default function init(cb) {
-    // const [url, fH, fV] = ['https://i.ibb.co/Hq62Pqr/spritesheet-1.png', 1, 31] // 31
-    // const [url, fH, fV] = ['./62.png', 31, 2]
-    const [url, fH, fV] = ['./60.png', 30, 2]
-    // const [url, fH, fV] = ['./tiles.png', 32, 2]
-    const loader = new THREE.TextureLoader()
-    const material = new THREE.SpriteMaterial({ map: loader.load(url) })
-    material.map.minFilter = THREE.LinearFilter
-
-    const material2 = new THREE.SpriteMaterial({ map: loader.load(url) })
-    material2.map.minFilter = THREE.LinearFilter
-
-    const fps = 5
-    const frameDisplayDuration = 1000 / fps // 30 frames per second
+// INTERESTING
+function init(cb) {
     const soldier = SpriteAnimated()
-    soldier.addFrames({
-        material,
-        framesHorizontal: fH,
-        framesVertical: fV,
-        frameDisplayDuration
-    })
-    soldier.addFrames({
-        material: material2,
-        framesHorizontal: fH,
-        framesVertical: fV,
-        flipHorizontal: true,
-        // flipVertical: true,
-        frameDisplayDuration
-    })
+    addFrames(soldier, 'https://i.ibb.co/k0sw5NS/60.png', 30, 2)
+    addFrames(soldier, 'https://i.ibb.co/k0sw5NS/60.png', 30, 2, true)
+    // addFrames(soldier, 'https://i.ibb.co/Z1sVZks/tiles.png', 32, 2)
+    // addFrames(soldier, 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png', 1, 31)
 
     // console.log(soldier.frames.length)
-    soldier.goto(0)
+    // soldier.goto(72)
     // soldier.pause()
-    // soldier.setKeyFrame(30, {
-    //     onEnterFrame: () => {
-    //         console.log('onEnterFrame', soldier.currentFrame)
-    //         // setTimeout(() => {
-    //         //     console.log(soldier.currentFrame)
-    //         //     soldier.goto(0).play()
-    //         // }, 1000)
-    //         // soldier.pause()
-    //         return 0
-    //     }
-    // })
+    soldier.setKeyFrame(29, {
+        onLeaveFrame: () => 0
+    })
+    soldier.setKeyFrame(59, {
+        onLeaveFrame: () => 30
+    })
+    soldier.setKeyFrame(89, {
+        onLeaveFrame: () => 60
+    })
+    soldier.setKeyFrame(119, {
+        onLeaveFrame: () => 90
+    })
 
     const scale = 10
     soldier.sprites.position.set(5, 5, 5)
     soldier.sprites.scale.set(scale, scale, scale)
-    cb({ soldier })
+    return soldier
 }
 
-// export default function init(cb) {
-//     // const url = 'https://i.ibb.co/mqTC0sy/spritesheet-1.png'
-//     const url = 'https://i.ibb.co/8BM8NTR/both-numbers.png'
-//     const loader = new THREE.TextureLoader()
-//     loader.load(url, texture => {
-//         const material = new THREE.SpriteMaterial({
-//             map: texture
-//             // color: 0xffffff,
-//             // premultipliedAlpha: true,
-//             // alphaTest: 1
-//         })
-//         material.map.minFilter = THREE.LinearFilter
+function addFrames(
+    soldier,
+    url,
+    framesHorizontal,
+    framesVertical,
+    flipHorizontal = false,
+    flipVertical = false,
+    fps = 30
+) {
+    const loader = new THREE.TextureLoader()
+    const material = new THREE.SpriteMaterial({ map: loader.load(url) })
+    material.map.minFilter = THREE.LinearFilter
 
-//         const soldier = new SpriteAnimated()
-//         const warrior = soldier.addFrames({
-//             material,
-//             width: 256,
-//             height: 256,
-//             tiles: 31
-//         })
+    soldier.addFrames({
+        material,
+        framesHorizontal,
+        framesVertical,
+        flipHorizontal,
+        flipVertical,
+        frameDisplayDuration: 1000 / fps // 30 frames per second,
+    })
+}
 
-//         const scale = 10
-//         warrior.position.set(5, 5, 5)
-//         warrior.scale.set(scale, scale, scale)
-//         cb({ warrior, soldier })
-//     })
-// }
+// NOT INTERESTING
+// NOT INTERESTING
+// NOT INTERESTING
 
-// export default function init(cb) {
-//     var loader = new THREE.TextureLoader()
-//     var soldier = SpriteMixer()
-//     // const url = 'https://i.ibb.co/5LyxShK/spritesheet-1.png'
-//     // const url = 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png'
-//     const url = 'https://i.ibb.co/RT1V9mW/both-numbers.png'
-//     // const url = 'https://i.ibb.co/kgb5R0J/spritesheet-3.png'
-//     // "https://felixmariotto.github.io/textures/warrior.png"
-//     const texture = loader.load(url)
-//     const warrior = soldier.ActionSprite(texture, 31, 2, 62, 25)
-//     // warrior = spriteMixer.ActionSprite(texture, 6, 6, 31, 25);
+const cameraPosition = 40
+const scene = new THREE.Scene()
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+const camera = new THREE.PerspectiveCamera(
+    25, // fov
+    window.innerWidth / window.innerHeight, // aspect
+    1, // near
+    999999 // far
+)
+camera.position.set(cameraPosition, cameraPosition, cameraPosition)
+camera.lookAt(new THREE.Vector3(0, 0, 0))
+renderer.setSize(window.innerWidth, window.innerHeight)
 
-//     const scale = 15
-//     warrior.position.set(5, 5, 5)
-//     warrior.scale.set(scale, scale, scale)
-//     // warrior.material.map.repeat.set(-1, 1);
-//     // warrior.material.map.offset.set( 1, 0);
-//     cb({ warrior, soldier })
-// }
+// geometry
+scene.add(new THREE.GridHelper(50, 100, 0xaaaaaa, 0x999999))
+
+// lights
+const dirLight = new THREE.DirectionalLight()
+dirLight.position.set(1, 0.4, 0.2)
+scene.add(dirLight, new THREE.AmbientLight(0x444444))
+
+document.body.appendChild(renderer.domElement)
+
+window.soldier = init()
+scene.add(window.soldier.sprites)
+
+// animate
+const clock = new THREE.Clock()
+function animate(time) {
+    renderer.render(scene, camera)
+    requestAnimationFrame(animate)
+
+    var delta = clock.getDelta()
+    window.soldier.update(delta)
+}
+animate()

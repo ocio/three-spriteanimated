@@ -14,11 +14,21 @@ export default function SpriteAnimated() {
             that.currentDisplayTime += delta * 1000
 
             const currentFrame = that.currentFrame
-            const { frameDisplayDuration } = that.frames[currentFrame]
+            const { frameDisplayDuration, onLeaveFrame } = that.frames[
+                currentFrame
+            ]
 
             // console.log(that.currentDisplayTime, frameDisplayDuration)
             while (that.currentDisplayTime > frameDisplayDuration) {
                 that.currentDisplayTime -= frameDisplayDuration
+
+                if (typeof onLeaveFrame == 'function') {
+                    const newCurrentFrame = onLeaveFrame()
+                    if (typeof newCurrentFrame == 'number') {
+                        return that.goto(newCurrentFrame)
+                    }
+                }
+
                 that.goto(
                     currentFrame < that.frames.length - 1 ? currentFrame + 1 : 0
                 )
@@ -37,7 +47,7 @@ export default function SpriteAnimated() {
     }
 
     that.goto = currentFrame => {
-        const { frameSet, frameIndex, onEnterFrame } = that.frames[currentFrame]
+        const { frameSet, frameIndex, onLeaveFrame } = that.frames[currentFrame]
 
         const {
             framesHorizontal,
@@ -63,12 +73,12 @@ export default function SpriteAnimated() {
         texture.offset.y = y
         that.currentFrame = currentFrame
 
-        if (typeof onEnterFrame == 'function') {
-            const newCurrentFrame = onEnterFrame()
-            if (typeof newCurrentFrame == 'number') {
-                that.goto(newCurrentFrame)
-            }
-        }
+        // if (typeof onEnterFrame == 'function') {
+        //     const newCurrentFrame = onEnterFrame()
+        //     if (typeof newCurrentFrame == 'number') {
+        //         that.goto(newCurrentFrame)
+        //     }
+        // }
 
         return that
     }
