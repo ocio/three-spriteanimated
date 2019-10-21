@@ -1,105 +1,155 @@
-// https://www.codeandweb.com/free-sprite-sheet-packer
-import './styles.css'
 import * as THREE from 'three'
-import SpriteAnimated from './SpriteAnimated'
 
-// INTERESTING
-function init(cb) {
-    const soldier = SpriteAnimated()
-    addFrames(soldier, 'https://i.ibb.co/k0sw5NS/60.png', 30, 2)
-    addFrames(soldier, 'https://i.ibb.co/k0sw5NS/60.png', 30, 2, true)
-    // addFrames(soldier, 'https://i.ibb.co/Z1sVZks/tiles.png', 32, 2)
-    // addFrames(soldier, 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png', 1, 31)
-    // addFrames(
-    //     soldier,
-    //     'https://felixmariotto.github.io/textures/character.png',
-    //     10,
-    //     2
-    // )
+export default function SpriteAnimated() {
+    const that = {
+        playing: true,
+        currentFrame: 0,
+        currentDisplayTime: 0,
+        frames: [],
+        sprites: new THREE.Group()
+    }
 
-    // console.log(soldier.frames.length)
-    // soldier.goto(72)
-    // soldier.pause()
+    that.update = delta => {
+        if (that.playing) {
+            that.currentDisplayTime += delta * 1000
 
-    soldier.setKeyFrame(29, {
-        onLeaveFrame: () => 0
-    })
-    soldier.setKeyFrame(59, {
-        onLeaveFrame: () => 30
-    })
-    soldier.setKeyFrame(89, {
-        onLeaveFrame: () => 60
-    })
-    soldier.setKeyFrame(119, {
-        onLeaveFrame: () => 90
-    })
+            const currentFrame = that.currentFrame
+            const { frameDisplayDuration, onLeaveFrame } = that.frames[
+                currentFrame
+            ]
 
-    const scale = 10
-    soldier.sprites.position.set(5, 5, 5)
-    soldier.sprites.scale.set(scale, scale, scale)
-    return soldier
-}
+            // console.log(that.currentDisplayTime, frameDisplayDuration)
+            while (that.currentDisplayTime > frameDisplayDuration) {
+                that.currentDisplayTime -= frameDisplayDuration
 
-function addFrames(
-    soldier,
-    url,
-    framesHorizontal,
-    framesVertical,
-    flipHorizontal = false,
-    flipVertical = false,
-    fps = 30
-) {
-    const loader = new THREE.TextureLoader()
-    const material = new THREE.SpriteMaterial({ map: loader.load(url) })
-    material.map.minFilter = THREE.LinearFilter
+                if (typeof onLeaveFrame == 'function') {
+                    const newCurrentFrame = onLeaveFrame(that)
+                    if (typeof newCurrentFrame == 'number') {
+                        return that.goto(newCurrentFrame)
+                    }
+                }
 
-    soldier.addFrames({
+                that.goto(
+                    currentFrame < that.frames.length - 1 ? currentFrame + 1 : 0
+                )
+            }
+        }
+    }
+
+    that.play = () => {
+        that.playing = true
+        return that
+    }
+
+    that.pause = () => {
+        that.playing = false
+        return that
+    }
+
+    that.goto = currentFrame => {
+        const { frameSet, frameIndex } = that.frames[currentFrame]
+
+        const {
+            framesHorizontal,
+            framesVertical,
+            flipHorizontal,
+            flipVertical,
+            texture,
+            sprite
+        } = frameSet
+
+        // Hiding framesets that are not being used
+        that.sprites.children.forEach(s => (s.visible = sprite === s))
+
+        const { x, y } = getOffsetTexture({
+            frame: frameIndex,
+            framesHorizontal,
+            framesVertical,
+            flipHorizontal,
+            flipVertical
+        })
+
+        texture.offset.x = x
+        texture.offset.y = y
+        that.currentFrame = currentFrame
+
+        // if (typeof onEnterFrame == 'function') {
+        //     const newCurrentFrame = onEnterFrame()
+        //     if (typeof newCurrentFrame == 'number') {
+        //         that.goto(newCurrentFrame)
+        //     }
+        // }
+
+        return that
+    }
+
+    that.setKeyFrame = (frame, { onLeaveFrame }) => {
+        // const object = that.frames[frame]
+        // that.frames[frame] = { ...object, ...options }
+        that.frames[frame].onLeaveFrame = onLeaveFrame
+    }
+
+    that.addFrames = ({
         material,
         framesHorizontal,
         framesVertical,
-        flipHorizontal,
-        flipVertical,
-        frameDisplayDuration: 1000 / fps // 30 frames per second,
-    })
+        totalFrames = framesHorizontal * framesVertical,
+        frameDisplayDuration = 1000 / 30, // 30 frames per second,
+        flipHorizontal = false,
+        flipVertical = false
+    }) => {
+        const texture = material.map
+        const sprite = new THREE.Sprite(material)
+        const frameSet = {
+            sprite,
+            texture,
+            framesHorizontal,
+            framesVertical,
+            flipHorizontal,
+            flipVertical
+        }
+
+        // Creating Frames
+        for (let frameIndex = 0; frameIndex < totalFrames; ++frameIndex) {
+            that.frames.push({
+                frameIndex,
+                frameSet,
+                frameDisplayDuration
+            })
+        }
+
+        texture.repeat.set(
+            (flipHorizontal ? -1 : 1) / framesHorizontal,
+            (flipVertical ? -1 : 1) / framesVertical
+        )
+
+        that.sprites.add(sprite)
+        that.goto(that.currentFrame)
+
+        return frameSet
+    }
+
+    return that
 }
 
-// NOT INTERESTING
-// NOT INTERESTING
-// NOT INTERESTING
+function getOffsetTexture({
+    frame,
+    framesHorizontal,
+    framesVertical,
+    flipHorizontal,
+    flipVertical
+}) {
+    let column = frame % framesHorizontal
+    let row = Math.floor(frame / framesHorizontal)
 
-const cameraPosition = 40
-const scene = new THREE.Scene()
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
-const camera = new THREE.PerspectiveCamera(
-    25, // fov
-    window.innerWidth / window.innerHeight, // aspect
-    1, // near
-    999999 // far
-)
-camera.position.set(cameraPosition, cameraPosition, cameraPosition)
-camera.lookAt(new THREE.Vector3(0, 0, 0))
-renderer.setSize(window.innerWidth, window.innerHeight)
+    if (flipHorizontal) column = framesHorizontal - column - 1
+    if (flipVertical) row = framesVertical - row - 1
 
-// geometry
-scene.add(new THREE.GridHelper(50, 100, 0xaaaaaa, 0x999999))
+    const x = column / framesHorizontal
+    const y = (framesVertical - row - 1) / framesVertical
 
-// lights
-const dirLight = new THREE.DirectionalLight()
-dirLight.position.set(1, 0.4, 0.2)
-scene.add(dirLight, new THREE.AmbientLight(0x444444))
-
-document.body.appendChild(renderer.domElement)
-
-window.soldier = init()
-scene.add(window.soldier.sprites)
-
-// animate
-const clock = new THREE.Clock()
-function animate(time) {
-    renderer.render(scene, camera)
-    requestAnimationFrame(animate)
-
-    var delta = clock.getDelta()
-    window.soldier.update(delta)
+    return {
+        x: flipHorizontal ? 1 - x : x,
+        y: flipVertical ? 1 - y : y
+    }
 }
-animate()
