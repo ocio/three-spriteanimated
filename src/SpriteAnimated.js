@@ -23,7 +23,7 @@ export default function SpriteAnimated() {
                 that.currentDisplayTime -= frameDisplayDuration
 
                 if (typeof onLeaveFrame == 'function') {
-                    const newCurrentFrame = onLeaveFrame()
+                    const newCurrentFrame = onLeaveFrame(that)
                     if (typeof newCurrentFrame == 'number') {
                         return that.goto(newCurrentFrame)
                     }
@@ -47,7 +47,7 @@ export default function SpriteAnimated() {
     }
 
     that.goto = currentFrame => {
-        const { frameSet, frameIndex, onLeaveFrame } = that.frames[currentFrame]
+        const { frameSet, frameIndex } = that.frames[currentFrame]
 
         const {
             framesHorizontal,

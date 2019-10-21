@@ -10,10 +10,17 @@ function init(cb) {
     addFrames(soldier, 'https://i.ibb.co/k0sw5NS/60.png', 30, 2, true)
     // addFrames(soldier, 'https://i.ibb.co/Z1sVZks/tiles.png', 32, 2)
     // addFrames(soldier, 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png', 1, 31)
+    // addFrames(
+    //     soldier,
+    //     'https://felixmariotto.github.io/textures/character.png',
+    //     10,
+    //     2
+    // )
 
     // console.log(soldier.frames.length)
     // soldier.goto(72)
     // soldier.pause()
+
     soldier.setKeyFrame(29, {
         onLeaveFrame: () => 0
     })
@@ -40,7 +47,7 @@ function addFrames(
     framesVertical,
     flipHorizontal = false,
     flipVertical = false,
-    fps = 5
+    fps = 30
 ) {
     const loader = new THREE.TextureLoader()
     const material = new THREE.SpriteMaterial({ map: loader.load(url) })
