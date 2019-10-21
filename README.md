@@ -11,6 +11,14 @@ const soldier = SpriteAnimated()
 
 ## Methods
 
+### .play()
+
+### .pause()
+
+### .goto(number)
+
+### .update(delta)
+
 ### .addFrames()
 
 ```js
@@ -27,16 +35,8 @@ soldier.addFrames({
 ### .sprites
 
 ```js
-scene.add(soldier.sprites)
+scene.add(soldier.sprites) // .sprites is a THREE.Group
 ```
-
-### .update(delta)
-
-### .play()
-
-### .pause()
-
-### .goto(number)
 
 ### .setKeyFrame(number, { onLeaveFrame })
 
@@ -81,7 +81,7 @@ soldier.addFrames({
     framesHorizontal: 30,
     framesVertical: 2
 })
-scene.add(soldier.sprites) // soldier.sprites is a THREE.Group
+scene.add(soldier.sprites)
 
 // animate
 const clock = new THREE.Clock()
