@@ -19,7 +19,7 @@ const soldier = SpriteAnimated()
 
 ### .update(delta)
 
-### .addFrames()
+### .addFrames({ material, framesHorizontal, framesVertical, [flipHorizontal, flipVertical, frameDisplayDuration ]})
 
 ```js
 soldier.addFrames({
