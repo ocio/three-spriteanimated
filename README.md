@@ -99,3 +99,9 @@ animate()
 Basic: https://codesandbox.io/s/withered-sky-50bde
 
 Advanced: https://codesandbox.io/s/spriteanimated-ybrt1
+
+# Tools (Texture Packers)
+
+https://www.codeandweb.com/free-sprite-sheet-packer
+https://www.codeandweb.com/texturepacker
+http://free-tex-packer.com/download/
