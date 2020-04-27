@@ -1,53 +1,59 @@
 import * as THREE from 'three'
 
 export default function SpriteAnimated() {
-    const that = {
+    const animation = {
         playing: true,
         currentFrame: 0,
         currentDisplayTime: 0,
         frames: [],
-        sprites: new THREE.Group()
+        sprites: new THREE.Group(),
     }
 
-    that.update = delta => {
-        if (that.playing) {
-            that.currentDisplayTime += delta * 1000
+    animation.getFrame = () => {
+        return animation.currentFrame
+    }
 
-            const currentFrame = that.currentFrame
-            const { frameDisplayDuration, onLeaveFrame } = that.frames[
+    animation.update = (delta) => {
+        if (animation.playing) {
+            animation.currentDisplayTime += delta * 1000
+
+            const currentFrame = animation.currentFrame
+            const { frameDisplayDuration, onLeaveFrame } = animation.frames[
                 currentFrame
             ]
 
-            // console.log(that.currentDisplayTime, frameDisplayDuration)
-            while (that.currentDisplayTime > frameDisplayDuration) {
-                that.currentDisplayTime -= frameDisplayDuration
+            // console.log(animation.currentDisplayTime, frameDisplayDuration)
+            while (animation.currentDisplayTime > frameDisplayDuration) {
+                animation.currentDisplayTime -= frameDisplayDuration
 
                 if (typeof onLeaveFrame == 'function') {
-                    const newCurrentFrame = onLeaveFrame(that)
+                    const newCurrentFrame = onLeaveFrame(animation)
                     if (typeof newCurrentFrame == 'number') {
-                        return that.goto(newCurrentFrame)
+                        return animation.goto(newCurrentFrame)
                     }
                 }
 
-                that.goto(
-                    currentFrame < that.frames.length - 1 ? currentFrame + 1 : 0
+                animation.goto(
+                    currentFrame < animation.frames.length - 1
+                        ? currentFrame + 1
+                        : 0
                 )
             }
         }
     }
 
-    that.play = () => {
-        that.playing = true
-        return that
+    animation.play = () => {
+        animation.playing = true
+        return animation
     }
 
-    that.pause = () => {
-        that.playing = false
-        return that
+    animation.pause = () => {
+        animation.playing = false
+        return animation
     }
 
-    that.goto = currentFrame => {
-        const { frameSet, frameIndex } = that.frames[currentFrame]
+    animation.goto = (currentFrame) => {
+        const { frameSet, frameIndex } = animation.frames[currentFrame]
 
         const {
             framesHorizontal,
@@ -55,48 +61,48 @@ export default function SpriteAnimated() {
             flipHorizontal,
             flipVertical,
             texture,
-            sprite
+            sprite,
         } = frameSet
 
-        // Hiding framesets that are not being used
-        that.sprites.children.forEach(s => (s.visible = sprite === s))
+        // Hiding framesets animation are not being used
+        animation.sprites.children.forEach((s) => (s.visible = sprite === s))
 
         const { x, y } = getOffsetTexture({
             frame: frameIndex,
             framesHorizontal,
             framesVertical,
             flipHorizontal,
-            flipVertical
+            flipVertical,
         })
 
         texture.offset.x = x
         texture.offset.y = y
-        that.currentFrame = currentFrame
+        animation.currentFrame = currentFrame
 
         // if (typeof onEnterFrame == 'function') {
         //     const newCurrentFrame = onEnterFrame()
         //     if (typeof newCurrentFrame == 'number') {
-        //         that.goto(newCurrentFrame)
+        //         animation.goto(newCurrentFrame)
         //     }
         // }
 
-        return that
+        return animation
     }
 
-    that.setKeyFrame = (frame, { onLeaveFrame }) => {
-        // const object = that.frames[frame]
-        // that.frames[frame] = { ...object, ...options }
-        that.frames[frame].onLeaveFrame = onLeaveFrame
+    animation.setKeyFrame = (frame, { onLeaveFrame }) => {
+        // const object = animation.frames[frame]
+        // animation.frames[frame] = { ...object, ...options }
+        animation.frames[frame].onLeaveFrame = onLeaveFrame
     }
 
-    that.addFrames = ({
+    animation.addFrames = ({
         material,
         framesHorizontal,
         framesVertical,
         totalFrames = framesHorizontal * framesVertical,
         frameDisplayDuration = 1000 / 30, // 30 frames per second,
         flipHorizontal = false,
-        flipVertical = false
+        flipVertical = false,
     }) => {
         const texture = material.map
         const sprite = new THREE.Sprite(material)
@@ -106,15 +112,15 @@ export default function SpriteAnimated() {
             framesHorizontal,
             framesVertical,
             flipHorizontal,
-            flipVertical
+            flipVertical,
         }
 
         // Creating Frames
         for (let frameIndex = 0; frameIndex < totalFrames; ++frameIndex) {
-            that.frames.push({
+            animation.frames.push({
                 frameIndex,
                 frameSet,
-                frameDisplayDuration
+                frameDisplayDuration,
             })
         }
 
@@ -123,13 +129,13 @@ export default function SpriteAnimated() {
             (flipVertical ? -1 : 1) / framesVertical
         )
 
-        that.sprites.add(sprite)
-        that.goto(that.currentFrame)
+        animation.sprites.add(sprite)
+        animation.goto(animation.currentFrame)
 
         return frameSet
     }
 
-    return that
+    return animation
 }
 
 function getOffsetTexture({
@@ -137,7 +143,7 @@ function getOffsetTexture({
     framesHorizontal,
     framesVertical,
     flipHorizontal,
-    flipVertical
+    flipVertical,
 }) {
     let column = frame % framesHorizontal
     let row = Math.floor(frame / framesHorizontal)
@@ -150,6 +156,6 @@ function getOffsetTexture({
 
     return {
         x: flipHorizontal ? 1 - x : x,
-        y: flipVertical ? 1 - y : y
+        y: flipVertical ? 1 - y : y,
     }
 }

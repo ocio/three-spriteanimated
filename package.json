@@ -1,6 +1,6 @@
 {
     "name": "@ocio/three-spriteanimated",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "main": "dist/three-spriteanimated.cjs.js",
     "module": "dist/three-spriteanimated.esm.js",
     "browser": "dist/three-spriteanimated.umd.js",
