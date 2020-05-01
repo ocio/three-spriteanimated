@@ -10,7 +10,7 @@ function init(cb) {
     addFrames(soldier, 'http://localhost:1234/60.png', 30, 2)
     addFrames(soldier, 'http://localhost:1234/60.png', 30, 2, true)
     // addFrames(soldier, 'https://i.ibb.co/Z1sVZks/tiles.png', 32, 2)
-    // addFrames(soldier, 'https://i.ibb.co/Hq62Pqr/spritesheet-1.png', 1, 31)
+    // addFrames(soldier, 'https://i.ibb.co/Hq62Pqr/objectsheet-1.png', 1, 31)
 
     // console.log(soldier.frames.length)
     // soldier.goto(72)
@@ -29,8 +29,8 @@ function init(cb) {
     })
 
     const scale = 5
-    soldier.sprites.position.set(0, 1, 0)
-    soldier.sprites.scale.set(scale, scale, scale)
+    soldier.objects.position.set(0, 1, 0)
+    soldier.objects.scale.set(scale, scale, scale)
     return soldier
 }
 
@@ -45,10 +45,11 @@ function addFrames(
 ) {
     const loader = new THREE.TextureLoader()
     const material = new THREE.SpriteMaterial({ map: loader.load(url) })
+    const sprite = new THREE.Sprite(material)
     material.map.minFilter = THREE.LinearFilter
 
     soldier.addFrames({
-        material,
+        object: sprite,
         framesHorizontal,
         framesVertical,
         flipHorizontal,
@@ -83,7 +84,7 @@ scene.add(grid)
 document.body.appendChild(renderer.domElement)
 
 window.soldier = init()
-scene.add(window.soldier.sprites)
+scene.add(window.soldier.objects)
 
 // animate
 const clock = new THREE.Clock()

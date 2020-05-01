@@ -6,7 +6,7 @@ export default function SpriteAnimated() {
         currentFrame: 0,
         currentDisplayTime: 0,
         frames: [],
-        sprites: new THREE.Group(),
+        objects: new THREE.Group(),
     }
 
     animation.getFrame = () => {
@@ -60,12 +60,11 @@ export default function SpriteAnimated() {
             framesVertical,
             flipHorizontal,
             flipVertical,
-            texture,
-            sprite,
+            object,
         } = frameSet
 
         // Hiding framesets animation are not being used
-        animation.sprites.children.forEach((s) => (s.visible = sprite === s))
+        animation.objects.children.forEach((s) => (s.visible = object === s))
 
         const { col, row } = getPositionByFrame({
             frame: frameIndex,
@@ -84,10 +83,17 @@ export default function SpriteAnimated() {
             flipVertical,
         })
 
-        console.log({ col, row, x, y })
+        // getCellUv({
+        //     x: 0,
+        //     y: 0,
+        //     cols: framesHorizontal,
+        //     rows: framesVertical,
+        // }).forEach(([x, y], index) => {
+        //     object.geometry.attributes.uv.setXY(index, x, y)
+        // })
+        object.material.map.offset.x = x
+        object.material.map.offset.y = y
 
-        texture.offset.x = x
-        texture.offset.y = y
         animation.currentFrame = currentFrame
 
         // if (typeof onEnterFrame == 'function') {
@@ -107,7 +113,7 @@ export default function SpriteAnimated() {
     }
 
     animation.addFrames = ({
-        material,
+        object,
         framesHorizontal,
         framesVertical,
         totalFrames = framesHorizontal * framesVertical,
@@ -115,11 +121,8 @@ export default function SpriteAnimated() {
         flipHorizontal = false,
         flipVertical = false,
     }) => {
-        const texture = material.map
-        const sprite = new THREE.Sprite(material)
         const frameSet = {
-            sprite,
-            texture,
+            object,
             framesHorizontal,
             framesVertical,
             flipHorizontal,
@@ -135,12 +138,12 @@ export default function SpriteAnimated() {
             })
         }
 
-        texture.repeat.set(
+        object.material.map.repeat.set(
             (flipHorizontal ? -1 : 1) / framesHorizontal,
             (flipVertical ? -1 : 1) / framesVertical
         )
 
-        animation.sprites.add(sprite)
+        animation.objects.add(object)
         animation.goto(animation.currentFrame)
 
         return frameSet
@@ -182,19 +185,15 @@ function getOffsetByPosition({
     }
 }
 
-// function getCellUv({ x = 0, y = 0, cols, rows }) {
-//     const colsdiv = 1 / cols
-//     const rowsdiv = 1 / rows
-//     const realx = x
-//     const realy = rows - y - 1
-//     return [
-//         [realx * colsdiv, realy * rowsdiv],
-//         [realx * colsdiv + colsdiv, realy * rowsdiv],
-//         [realx * colsdiv, realy * rowsdiv + rowsdiv],
-//         [realx * colsdiv + colsdiv, realy * rowsdiv + rowsdiv],
-//     ]
-// }
-
-// getCellUv({ x: 4, y: 1, cols: 8, rows: 4 }).forEach(([x, y], index) => {
-//     planeGeom.attributes.uv.setXY(index, x, y)
-// })
+function getCellUv({ x, y, cols, rows }) {
+    const colsdiv = 1 / cols
+    const rowsdiv = 1 / rows
+    const realx = x
+    const realy = rows - y - 1
+    return [
+        [realx * colsdiv, realy * rowsdiv + rowsdiv],
+        [realx * colsdiv + colsdiv, realy * rowsdiv + rowsdiv],
+        [realx * colsdiv, realy * rowsdiv],
+        [realx * colsdiv + colsdiv, realy * rowsdiv],
+    ]
+}
