@@ -67,13 +67,24 @@ export default function SpriteAnimated() {
         // Hiding framesets animation are not being used
         animation.sprites.children.forEach((s) => (s.visible = sprite === s))
 
-        const { x, y } = getOffsetTexture({
+        const { col, row } = getPositionByFrame({
             frame: frameIndex,
             framesHorizontal,
             framesVertical,
             flipHorizontal,
             flipVertical,
         })
+
+        const { x, y } = getOffsetByPosition({
+            col,
+            row,
+            framesHorizontal,
+            framesVertical,
+            flipHorizontal,
+            flipVertical,
+        })
+
+        console.log({ col, row, x, y })
 
         texture.offset.x = x
         texture.offset.y = y
@@ -138,20 +149,31 @@ export default function SpriteAnimated() {
     return animation
 }
 
-function getOffsetTexture({
+function getPositionByFrame({
     frame,
     framesHorizontal,
     framesVertical,
     flipHorizontal,
     flipVertical,
 }) {
-    let column = frame % framesHorizontal
+    let col = frame % framesHorizontal
     let row = Math.floor(frame / framesHorizontal)
 
-    if (flipHorizontal) column = framesHorizontal - column - 1
+    if (flipHorizontal) col = framesHorizontal - col - 1
     if (flipVertical) row = framesVertical - row - 1
 
-    const x = column / framesHorizontal
+    return { col, row }
+}
+
+function getOffsetByPosition({
+    col,
+    row,
+    framesVertical,
+    framesHorizontal,
+    flipHorizontal,
+    flipVertical,
+}) {
+    const x = col / framesHorizontal
     const y = (framesVertical - row - 1) / framesVertical
 
     return {
@@ -159,3 +181,20 @@ function getOffsetTexture({
         y: flipVertical ? 1 - y : y,
     }
 }
+
+// function getCellUv({ x = 0, y = 0, cols, rows }) {
+//     const colsdiv = 1 / cols
+//     const rowsdiv = 1 / rows
+//     const realx = x
+//     const realy = rows - y - 1
+//     return [
+//         [realx * colsdiv, realy * rowsdiv],
+//         [realx * colsdiv + colsdiv, realy * rowsdiv],
+//         [realx * colsdiv, realy * rowsdiv + rowsdiv],
+//         [realx * colsdiv + colsdiv, realy * rowsdiv + rowsdiv],
+//     ]
+// }
+
+// getCellUv({ x: 4, y: 1, cols: 8, rows: 4 }).forEach(([x, y], index) => {
+//     planeGeom.attributes.uv.setXY(index, x, y)
+// })
