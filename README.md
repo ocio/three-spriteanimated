@@ -25,7 +25,7 @@ const soldier = SpriteAnimated()
 soldier.addFrames({
     material,
     framesHorizontal: 30,
-    framesVertical: 2
+    framesVertical: 2,
     // flipHorizontal: false,
     // flipVertical: false,
     // frameDisplayDuration: 1000 / 30
@@ -43,7 +43,7 @@ scene.add(soldier.sprites) // .sprites is a THREE.Group
 ```js
 // When the 29 frame is about to end we move to the 0 frame to generate a loop
 soldier.setKeyFrame(29, {
-    onLeaveFrame: () => 0
+    onLeaveFrame: () => 0,
 })
 ```
 
@@ -79,7 +79,7 @@ const soldier = SpriteAnimated()
 soldier.addFrames({
     material,
     framesHorizontal: 30,
-    framesVertical: 2
+    framesVertical: 2,
 })
 scene.add(soldier.sprites)
 
@@ -96,9 +96,7 @@ animate()
 
 # Demos
 
-Basic: https://codesandbox.io/s/withered-sky-50bde
-
-Advanced: https://codesandbox.io/s/spriteanimated-ybrt1
+`npm run dev`
 
 # Tools (Texture Packers)
 

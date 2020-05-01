@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Parcel Sandbox</title>
+        <meta charset="UTF-8" />
+        <script>
+            function range(fps) {
+                document.getElementById('fps').value = `${fps} fps`
+                soldier.frames.forEach((frame) => {
+                    frame.frameDisplayDuration = 1000 / Number(fps)
+                })
+            }
+            function playpause() {
+                soldier.playing ? soldier.pause() : soldier.play()
+            }
+        </script>
+    </head>
+
+    <body>
+        <div id="app"></div>
+        <div id="buttons">
+            <button onclick="soldier.goto(0)">South</button>
+            <button onclick="soldier.goto(30)">North</button>
+            <button onclick="soldier.goto(60)">East</button>
+            <button onclick="soldier.goto(90)">West</button>
+
+            <button onclick="playpause()">play / pause</button>
+            <input id="fps" value="30 fps" style="width: 40px;" readonly />
+            <input
+                type="range"
+                name="points"
+                value="30"
+                min="1"
+                max="100"
+                oninput="range(this.value)"
+            />
+        </div>
+        <!-- <script src="https://raw.githubusercontent.com/felixmariotto/three-SpriteMixer/master/SpriteMixer.js"></script> -->
+        <script src="./index.js"></script>
+    </body>
+</html>
