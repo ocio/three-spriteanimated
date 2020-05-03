@@ -6,12 +6,16 @@
         <script>
             function range(fps) {
                 document.getElementById('fps').value = `${fps} fps`
-                soldier.frames.forEach((frame) => {
+                soldier1.frames.forEach((frame) => {
+                    frame.frameDisplayDuration = 1000 / Number(fps)
+                })
+                soldier2.frames.forEach((frame) => {
                     frame.frameDisplayDuration = 1000 / Number(fps)
                 })
             }
             function playpause() {
-                soldier.playing ? soldier.pause() : soldier.play()
+                soldier1.playing ? soldier1.pause() : soldier1.play()
+                soldier2.playing ? soldier2.pause() : soldier2.play()
             }
         </script>
     </head>
@@ -19,10 +23,10 @@
     <body>
         <div id="app"></div>
         <div id="buttons">
-            <button onclick="soldier.goto(0)">South</button>
-            <button onclick="soldier.goto(30)">North</button>
-            <button onclick="soldier.goto(60)">East</button>
-            <button onclick="soldier.goto(90)">West</button>
+            <button onclick="soldier1.goto(0);soldier2.goto(0)">South</button>
+            <button onclick="soldier1.goto(30);soldier2.goto(30)">North</button>
+            <!-- <button onclick="soldier1.goto(60);soldier2.goto(60)">East</button> -->
+            <!-- <button onclick="soldier1.goto(90);soldier2.goto(90)">West</button> -->
 
             <button onclick="playpause()">play / pause</button>
             <input id="fps" value="30 fps" style="width: 40px;" readonly />

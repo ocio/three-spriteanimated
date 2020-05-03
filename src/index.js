@@ -9,6 +9,48 @@ export default function SpriteAnimated() {
         objects: new THREE.Group(),
     }
 
+    // https://discourse.threejs.org/t/how-to-reuse-the-same-texture-in-different-sprites-and-change-the-uv-individually/14780/3?u=enzo
+    animation.addFrames = ({
+        object,
+        framesHorizontal,
+        framesVertical,
+        isUV = !(object instanceof THREE.Sprite),
+        totalFrames = framesHorizontal * framesVertical,
+        frameDisplayDuration = 1000 / 30, // 30 frames per second,
+        flipHorizontal = false,
+        flipVertical = false,
+    }) => {
+        const frameSet = {
+            object,
+            framesHorizontal,
+            framesVertical,
+            flipHorizontal,
+            flipVertical,
+            isUV,
+        }
+
+        // Creating Frames
+        for (let frameIndex = 0; frameIndex < totalFrames; ++frameIndex) {
+            animation.frames.push({
+                frameIndex,
+                frameSet,
+                frameDisplayDuration,
+            })
+        }
+
+        if (!isUV) {
+            object.material.map.repeat.set(
+                (flipHorizontal ? -1 : 1) / framesHorizontal,
+                (flipVertical ? -1 : 1) / framesVertical
+            )
+        }
+
+        animation.objects.add(object)
+        animation.goto(animation.currentFrame)
+
+        return frameSet
+    }
+
     animation.getFrame = () => {
         return animation.currentFrame
     }
@@ -54,13 +96,13 @@ export default function SpriteAnimated() {
 
     animation.goto = (currentFrame) => {
         const { frameSet, frameIndex } = animation.frames[currentFrame]
-
         const {
             framesHorizontal,
             framesVertical,
             flipHorizontal,
             flipVertical,
             object,
+            isUV,
         } = frameSet
 
         // Hiding framesets animation are not being used
@@ -74,79 +116,35 @@ export default function SpriteAnimated() {
             flipVertical,
         })
 
-        const { x, y } = getOffsetByPosition({
-            col,
-            row,
-            framesHorizontal,
-            framesVertical,
-            flipHorizontal,
-            flipVertical,
-        })
-
-        // getCellUv({
-        //     x: 0,
-        //     y: 0,
-        //     cols: framesHorizontal,
-        //     rows: framesVertical,
-        // }).forEach(([x, y], index) => {
-        //     object.geometry.attributes.uv.setXY(index, x, y)
-        // })
-        object.material.map.offset.x = x
-        object.material.map.offset.y = y
+        // https://discourse.threejs.org/t/how-to-reuse-the-same-texture-in-different-sprites-and-change-the-uv-individually/14780/3?u=enzo
+        if (isUV) {
+            getCellByPosition({
+                col,
+                row,
+                framesHorizontal,
+                framesVertical,
+            }).forEach(([x, y], index) =>
+                object.geometry.attributes.uv.setXY(index, x, y)
+            )
+            object.geometry.attributes.uv.needsUpdate = true
+        } else {
+            const { x, y } = getOffsetByPosition({
+                col,
+                row,
+                framesHorizontal,
+                framesVertical,
+            })
+            object.material.map.offset.x = x
+            object.material.map.offset.y = y
+        }
 
         animation.currentFrame = currentFrame
-
-        // if (typeof onEnterFrame == 'function') {
-        //     const newCurrentFrame = onEnterFrame()
-        //     if (typeof newCurrentFrame == 'number') {
-        //         animation.goto(newCurrentFrame)
-        //     }
-        // }
 
         return animation
     }
 
     animation.setKeyFrame = (frame, { onLeaveFrame }) => {
-        // const object = animation.frames[frame]
-        // animation.frames[frame] = { ...object, ...options }
         animation.frames[frame].onLeaveFrame = onLeaveFrame
-    }
-
-    animation.addFrames = ({
-        object,
-        framesHorizontal,
-        framesVertical,
-        totalFrames = framesHorizontal * framesVertical,
-        frameDisplayDuration = 1000 / 30, // 30 frames per second,
-        flipHorizontal = false,
-        flipVertical = false,
-    }) => {
-        const frameSet = {
-            object,
-            framesHorizontal,
-            framesVertical,
-            flipHorizontal,
-            flipVertical,
-        }
-
-        // Creating Frames
-        for (let frameIndex = 0; frameIndex < totalFrames; ++frameIndex) {
-            animation.frames.push({
-                frameIndex,
-                frameSet,
-                frameDisplayDuration,
-            })
-        }
-
-        object.material.map.repeat.set(
-            (flipHorizontal ? -1 : 1) / framesHorizontal,
-            (flipVertical ? -1 : 1) / framesVertical
-        )
-
-        animation.objects.add(object)
-        animation.goto(animation.currentFrame)
-
-        return frameSet
     }
 
     return animation
@@ -185,15 +183,18 @@ function getOffsetByPosition({
     }
 }
 
-function getCellUv({ x, y, cols, rows }) {
-    const colsdiv = 1 / cols
-    const rowsdiv = 1 / rows
-    const realx = x
-    const realy = rows - y - 1
+function getCellByPosition({ col, row, framesHorizontal, framesVertical }) {
+    const framesHorizontaldiv = 1 / framesHorizontal
+    const framesVerticaldiv = 1 / framesVertical
+    const x = col
+    const y = framesVertical - row - 1
     return [
-        [realx * colsdiv, realy * rowsdiv + rowsdiv],
-        [realx * colsdiv + colsdiv, realy * rowsdiv + rowsdiv],
-        [realx * colsdiv, realy * rowsdiv],
-        [realx * colsdiv + colsdiv, realy * rowsdiv],
+        [x * framesHorizontaldiv, y * framesVerticaldiv + framesVerticaldiv],
+        [
+            x * framesHorizontaldiv + framesHorizontaldiv,
+            y * framesVerticaldiv + framesVerticaldiv,
+        ],
+        [x * framesHorizontaldiv, y * framesVerticaldiv],
+        [x * framesHorizontaldiv + framesHorizontaldiv, y * framesVerticaldiv],
     ]
 }
