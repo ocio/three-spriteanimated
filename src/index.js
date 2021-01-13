@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export default function SpriteAnimated() {
+export default function SpriteAnimated({ onEnterFrame } = {}) {
     const animation = {
         playing: true,
         currentFrame: 0,
@@ -67,6 +67,10 @@ export default function SpriteAnimated() {
             // console.log(animation.currentDisplayTime, frameDisplayDuration)
             while (animation.currentDisplayTime > frameDisplayDuration) {
                 animation.currentDisplayTime -= frameDisplayDuration
+
+                if (typeof onEnterFrame == 'function') {
+                    onEnterFrame(currentFrame)
+                }
 
                 if (typeof onLeaveFrame == 'function') {
                     const newCurrentFrame = onLeaveFrame(animation)

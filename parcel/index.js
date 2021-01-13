@@ -19,7 +19,11 @@ function create() {
     })
     material.map.minFilter = THREE.LinearFilter
     const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(), material)
-    const soldier1 = SpriteAnimated()
+    const soldier1 = SpriteAnimated({
+        onEnterFrame: (f) => {
+            // console.log(f)
+        },
+    })
     soldier1.addFrames({
         object: mesh,
         framesHorizontal,
@@ -95,7 +99,7 @@ function animate(time) {
 
     var delta = clock.getDelta()
     soldier1.update(delta)
-    soldier2.update(delta)
+    // soldier2.update(delta)
 }
 animate()
 
