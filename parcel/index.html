@@ -15,7 +15,6 @@
             }
             function playpause() {
                 soldier1.playing ? soldier1.pause() : soldier1.play()
-                soldier2.playing ? soldier2.pause() : soldier2.play()
             }
         </script>
     </head>
@@ -29,7 +28,7 @@
             <!-- <button onclick="soldier1.goto(90);soldier2.goto(90)">West</button> -->
 
             <button onclick="playpause()">play / pause</button>
-            <input id="fps" value="30 fps" style="width: 40px;" readonly />
+            <input id="fps" value="30 fps" style="width: 40px" readonly />
             <input
                 type="range"
                 name="points"

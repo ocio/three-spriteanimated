@@ -18,39 +18,26 @@ function create() {
         transparent: true,
     })
     material.map.minFilter = THREE.LinearFilter
-    const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(), material)
+
+    const texture2 = loader.load(`http://${location.host}/60.png`)
+    const material2 = new THREE.SpriteMaterial({ map: texture2 })
+    material2.map.minFilter = THREE.LinearFilter
+    const sprite = new THREE.Sprite(material2)
     const soldier1 = SpriteAnimated({
         onEnterFrame: (f) => {
             // console.log(f)
         },
     })
     soldier1.addFrames({
-        object: mesh,
+        object: sprite,
         framesHorizontal,
         framesVertical,
-        // flipHorizontal,
-        // flipVertical,
-        // frameDisplayDuration: 1000 / fps, // 30 frames per second,
     })
     soldier1.setKeyFrame(29, { onLeaveFrame: () => 0 })
     soldier1.setKeyFrame(59, { onLeaveFrame: () => 30 })
     soldier1.objects.scale.set(scale, scale, scale)
 
-    const texture2 = loader.load('http://localhost:1234/60.png')
-    const material2 = new THREE.SpriteMaterial({ map: texture2 })
-    material2.map.minFilter = THREE.LinearFilter
-    const sprite = new THREE.Sprite(material2)
-    const soldier2 = SpriteAnimated()
-    soldier2.addFrames({
-        object: sprite,
-        framesHorizontal,
-        framesVertical,
-    })
-    soldier2.setKeyFrame(29, { onLeaveFrame: () => 0 })
-    soldier2.setKeyFrame(59, { onLeaveFrame: () => 30 })
-    soldier2.objects.scale.set(scale, scale, scale)
-
-    return { soldier1, soldier2 }
+    return { soldier1 }
 }
 
 // NOT INTERESTING
@@ -78,12 +65,10 @@ scene.add(grid)
 
 document.body.appendChild(renderer.domElement)
 
-const { soldier1, soldier2 } = create()
+const { soldier1 } = create()
 window.soldier1 = soldier1
-window.soldier2 = soldier2
-soldier2.objects.position.set(5, 0, 5)
+soldier1.objects.position.set(5, 0, 5)
 scene.add(soldier1.objects)
-scene.add(soldier2.objects)
 
 // animate
 const clock = new THREE.Clock()
@@ -97,9 +82,8 @@ function animate(time) {
     controls.update()
     requestAnimationFrame(animate)
 
-    var delta = clock.getDelta()
+    const delta = clock.getDelta()
     soldier1.update(delta)
-    // soldier2.update(delta)
 }
 animate()
 
